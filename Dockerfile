@@ -6,4 +6,4 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
-CMD ["gunicorn", "emisbackend:app", "-c", "./gunicorn.conf.py"]
+CMD ["gunicorn", "app:app", "-c", "./gunicorn.conf.py"]
