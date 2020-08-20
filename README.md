@@ -4,33 +4,50 @@ This is the backend of the Emis project.
 
 ## REST APIs
 
+VPS IP Address: 162.62.53.126
+
+Port: 4123
+
 ### Get an article by ID
 
-GET {emis-backend}/articles/{articleId}
+GET 162.62.53.126:4123/articles/{articleId}
 
 **JSON return**
 
+An example:
+
 ```json
 {
-  "id": "string",
-  "title": "string",
-  "author": "string",
-  "created": "string",
-  "body": "string",
-  "related": "string[]"
+    "id": "string",
+    "title": "string",
+    "author": "string",
+    "created": "string",
+    "body": "string",
+    "related": [
+        {
+            "id": "string",
+            "title": "string",
+            "author": "string",
+            "created": "string",
+            "view_count": 0
+        }
+    ]
 }
 ```
 
-### Get articles sorted by date (descending order)
+### Get articles
 
-GET {emis-backend}/articles\[?limit=10\]\[&start=20\]
+GET 162.62.53.126:4123/articles\[?limit=10\]\[&start=20\]\[&query=keyword]
 
 Optional parameters:
 
 - limit: the number of shown articles
 - start: the start index
+- query: search term
 
 **JSON return**
+
+An example:
 
 ```json
 [
@@ -38,10 +55,28 @@ Optional parameters:
     "id": "string",
     "title": "string", 
     "author": "string",
-    "created": "string: 2020-08-01"
+    "created": "2020-08-01"
   }
 ]
 ```
+## Tests
+
+### Performance Testing
+Performance Testing is done by Locust.
+
+1. Go to tests/locust dir
+
+   ```cmd
+   cd tests/locust
+   ```
+
+2. Run Locust
+
+   ```cmd
+   locust
+   ```
+
+3. visit http://127.0.0.1:8089/
 
 ## Docker
 
@@ -64,7 +99,7 @@ If you want to use the backend locally, first make sure Docker is installed loca
 3. run docker
 
    ```cmd
-   docker run -d -p 80:80 emis-backend
+   docker run -d -p 4123:80 emis-backend
    ```
 
 
@@ -79,7 +114,7 @@ If you want to use the backend locally, first make sure Docker is installed loca
 2. run docker
 
    ```cmd
-   docker run -d -p 80:80 wentaoyang/emis-backend:latest
+   docker run -d -p 4123:80 wentaoyang/emis-backend:latest
    ```
 
    

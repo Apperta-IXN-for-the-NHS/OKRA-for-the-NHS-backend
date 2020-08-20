@@ -9,4 +9,4 @@ before_script:
   - export PYTHONPATH=${PYTHONPATH}:/home/travis/build/Went-Yang/emis-backend
 
 script:
-  - python tests/test_hello_world.py
+  - python tests/unittest/test_knowledge_service.py

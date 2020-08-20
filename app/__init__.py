@@ -9,9 +9,12 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 db.Model.metadata.reflect(db.engine)
 
+# get table schema
 class Article(db.Model):
     __table__ = db.Model.metadata.tables['kb_knowledge']
 
+class RelatedArticles(db.Model):
+    __table__ = db.Model.metadata.tables['related_knowledge']
 
-from app.views import api
+from app.controller import api
 app.register_blueprint(api)
