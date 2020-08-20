@@ -16,5 +16,12 @@ class Article(db.Model):
 class RelatedArticles(db.Model):
     __table__ = db.Model.metadata.tables['related_knowledge']
 
+class Score(db.Model):
+    __table__ = db.Model.metadata.tables['kb_knowledge_score']
+
+class Vote(db.Model):
+    __table__ = db.Model.metadata.tables['vote_record']
+
+
 from app.controller import api
 app.register_blueprint(api)

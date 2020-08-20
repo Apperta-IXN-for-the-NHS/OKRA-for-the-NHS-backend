@@ -1,4 +1,4 @@
-from app import Article, RelatedArticles, db
+from app import Article, RelatedArticles, db, Score, Vote
 
 
 # return brief info on articles
@@ -62,9 +62,43 @@ def get_articles_sorted_by_date(limit, start):
 
     return [get_article_brief_info(article) for article in res]
 
+
 # return articles searched by query
 # sorted by date and id to make sure the articles are always in the same order
 def get_articles_by_query(query, limit, start):
     res = Article.query.filter(Article.short_description.ilike(f"%{query}%")).order_by(Article.published.desc(), Article.sys_id).offset(start).limit(limit)
 
     return [get_article_brief_info(article) for article in res]
+
+
+def handle_vote(article_id, client_id, direction):
+    # if the article does not exist, return false
+    if Article.query.filter_by(sys_id=article_id).first() is None:
+        return False
+
+    res = Vote.query.filter_by(sys_id=article_id, client_id=client_id).first()
+    # if no previous record, add new one
+    if res is None:
+        # if no record in db but get 0 to cancel the record, return false
+        if direction == 0:
+            return False
+        res = Vote(sys_id=article_id, client_id=client_id, vote=direction)
+        diff = direction
+        db.session.add(res)
+    else:
+        # if have, find the previous one
+        prev = res.vote
+        # if equals 0, means the user cancel his like/dislike
+        # remove the record to avoid too much data in the table
+        if direction == 0:
+            db.session.delete(res)
+        else:
+            # if not, update to the new one
+            res.vote = direction
+        # calculate the difference
+        diff = direction - prev
+
+    score = Score.query.filter_by(sys_id=article_id).first()
+    score.net_votes += diff
+    db.session.commit()
+    return True

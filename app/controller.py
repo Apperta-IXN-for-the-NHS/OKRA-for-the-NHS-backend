@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from app.knowledge_service import get_article_by_id, get_articles_sorted_by_date, get_articles_by_query
+from app.knowledge_service import get_article_by_id, get_articles_sorted_by_date, get_articles_by_query, handle_vote
 
 api = Blueprint('api', __name__)
 
@@ -56,3 +56,15 @@ def get_articles():
         article_list = get_articles_by_query(query, limit, start)
 
     return jsonify(article_list), 200 if article_list else 404
+
+
+@api.route('/articles/<article_id>/vote', methods=['POST'])
+def vote(article_id):
+    req = request.get_json()
+    client_id = req['clientId']
+    vote = req['direction']
+
+    if vote not in [-1, 0, 1]:
+        return '', 400
+
+    return '', 200 if handle_vote(article_id, client_id, vote) else 400

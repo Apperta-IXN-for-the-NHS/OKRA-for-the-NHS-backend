@@ -46,6 +46,18 @@ class RestAPITests(unittest.TestCase):
         response = json.loads(self.tester.get('/articles?start=1&limit=3', content_type='html/text').data)
         self.assertEqual(len(response), 3)
 
+    def test_vote_0_when_no_record(self):
+        response = self.tester.post('/articles/a746226a1bb954106281fcc1cd4bcb7a/vote',
+                                    data=json.dumps({'clientId': '111', 'direction': 0}),
+                                    content_type='application/json')
+        self.assertTrue('400' in response.status)
+
+    def test_vote_illegal_direction(self):
+        response = self.tester.post('/articles/a746226a1bb954106281fcc1cd4bcb7a/vote',
+                                    data=json.dumps({'clientId': '111', 'direction': 2}),
+                                    content_type='application/json')
+        self.assertTrue('400' in response.status)
+
 
 if __name__ == '__main__':
     unittest.main()
