@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from app.knowledge_service import get_article_by_id, get_articles_sorted_by_date, get_articles_by_query, handle_vote
+from app.knowledge_service import get_article_by_id, get_articles_sorted_by_trending, get_articles_by_query, handle_vote
 
 api = Blueprint('api', __name__)
 
@@ -51,7 +51,7 @@ def get_articles():
 
     query = request.args.get('query')
     if query is None:
-        article_list = get_articles_sorted_by_date(limit, start)
+        article_list = get_articles_sorted_by_trending(limit, start)
     else:
         article_list = get_articles_by_query(query, limit, start)
 

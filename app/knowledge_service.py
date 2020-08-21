@@ -55,20 +55,29 @@ def get_article_by_id(article_id):
     return get_article_all_info(res)
 
 
-# return most recent articles
-# sorted by id to make sure the articles are always in the same order
-def get_articles_sorted_by_date(limit, start):
-    res = Article.query.filter(Article.published.isnot(None)).order_by(Article.published.desc(), Article.sys_id).offset(start).limit(limit)
-
-    return [get_article_brief_info(article) for article in res]
+# return articles sorted by trending score
+def get_articles_sorted_by_trending(limit, start):
+    # find the id of the top 10 article sorted by trending score
+    res = Score.query.order_by(Score.trending_score.desc(), Score.published.desc(), Score.sys_id).offset(start).limit(limit)
+    article_ids = [article.sys_id for article in res]
+    # find their information according to the id
+    article_objs = Article.query.filter(Article.sys_id.in_(article_ids)).all()
+    # create a dictionary, id -> info
+    article_id_info = {article.sys_id: get_article_brief_info(article) for article in article_objs}
+    # return brief info
+    return [article_id_info[article_id] for article_id in article_ids]
 
 
 # return articles searched by query
-# sorted by date and id to make sure the articles are always in the same order
 def get_articles_by_query(query, limit, start):
-    res = Article.query.filter(Article.short_description.ilike(f"%{query}%")).order_by(Article.published.desc(), Article.sys_id).offset(start).limit(limit)
-
-    return [get_article_brief_info(article) for article in res]
+    # search
+    res = Article.query.filter(Article.short_description.ilike(f"%{query}%")).offset(start).limit(limit)
+    # create a dictionary, id -> article info
+    article_id_info = {article.sys_id: get_article_brief_info(article) for article in res}
+    # find the trending order
+    article_objs = Score.query.filter(Score.sys_id.in_(article_id_info.keys())).order_by(Score.trending_score.desc(), Score.published.desc(), Score.sys_id).all()
+    # return info according to the order
+    return [article_id_info[article.sys_id] for article in article_objs]
 
 
 def handle_vote(article_id, client_id, direction):
