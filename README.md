@@ -35,7 +35,7 @@ An example:
 }
 ```
 
-### Get articles sorted by trending score
+### Get articles sorted by trending and similarity
 
 GET 162.62.53.126:4123/articles\[?limit=10\]\[&start=20\]\[&query=keyword]
 
