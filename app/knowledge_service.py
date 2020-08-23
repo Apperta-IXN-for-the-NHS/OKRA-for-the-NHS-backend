@@ -1,4 +1,4 @@
-from app import Article, RelatedArticles, db, Score, Vote
+from app import Article, RelatedArticles, db, KnowledgeScore, Vote
 
 
 # return brief info on articles
@@ -20,18 +20,29 @@ def get_article_all_info(res):
 
     # return info about the related articles
     def get_related_articles(related_id):
-        score_res = RelatedArticles.query.filter_by(sys_id=related_id).order_by(RelatedArticles.score.desc())
+        # find related articles and their similarity scores, id -> similarity score
+        related_articles = RelatedArticles.query.filter_by(sys_id=related_id).order_by(RelatedArticles.score.desc())
+        related_id_similarity = {related.number: related.score for related in related_articles}
+        related_ids = related_id_similarity.keys()
 
-        # find related articles' id
-        related_ids = [score.number for score in score_res]
-
-        # use one query to find all the info about these articles
-        # store info in a dictionary because its lookup complexity is O(1)
+        # use one query to find all the info about these articles, id -> info
         article_res = Article.query.filter(Article.sys_id.in_(related_ids)).all()
         article_id_info = {article.sys_id: get_related_article_info(article) for article in article_res}
 
+        # find trending score of these articles, id -> trending score
+        trending_scores = KnowledgeScore.query.filter(KnowledgeScore.sys_id.in_(related_ids)).all()
+        related_id_trending = {score.sys_id: score.trending_score for score in trending_scores}
+
+        # calculate total score and sort in descending order
+        related_id_total = {}
+        for related_id in related_ids:
+            similarity_score = 0.5 * related_id_similarity[related_id] if related_id in related_id_similarity else 0
+            trending_score = 0.5 * related_id_trending[related_id] if related_id in related_id_trending else 0
+            related_id_total[related_id] = similarity_score + trending_score
+        sorted_ids = sorted(related_id_total.keys(), key=lambda x: x[1], reverse=True)
+
         # retrieve article info and output
-        return [article_id_info[related_id] for related_id in related_ids]
+        return [article_id_info[article_id] for article_id in sorted_ids]
 
     return {'id': res.sys_id if res.sys_id else '',
             'title': res.short_description if res.short_description else '',
@@ -58,7 +69,7 @@ def get_article_by_id(article_id):
 # return articles sorted by trending score
 def get_articles_sorted_by_trending(limit, start):
     # find the id of the top 10 article sorted by trending score
-    res = Score.query.order_by(Score.trending_score.desc(), Score.published.desc(), Score.sys_id).offset(start).limit(limit)
+    res = KnowledgeScore.query.order_by(KnowledgeScore.trending_score.desc(), KnowledgeScore.published.desc(), KnowledgeScore.sys_id).offset(start).limit(limit)
     article_ids = [article.sys_id for article in res]
     # find their information according to the id
     article_objs = Article.query.filter(Article.sys_id.in_(article_ids)).all()
@@ -75,7 +86,7 @@ def get_articles_by_query(query, limit, start):
     # create a dictionary, id -> article info
     article_id_info = {article.sys_id: get_article_brief_info(article) for article in res}
     # find the trending order
-    article_objs = Score.query.filter(Score.sys_id.in_(article_id_info.keys())).order_by(Score.trending_score.desc(), Score.published.desc(), Score.sys_id).all()
+    article_objs = KnowledgeScore.query.filter(KnowledgeScore.sys_id.in_(article_id_info.keys())).order_by(KnowledgeScore.trending_score.desc(), KnowledgeScore.published.desc(), KnowledgeScore.sys_id).all()
     # return info according to the order
     return [article_id_info[article.sys_id] for article in article_objs]
 
@@ -107,7 +118,7 @@ def handle_vote(article_id, client_id, direction):
         # calculate the difference
         diff = direction - prev
 
-    score = Score.query.filter_by(sys_id=article_id).first()
+    score = KnowledgeScore.query.filter_by(sys_id=article_id).first()
     score.net_votes += diff
     db.session.commit()
     return True
