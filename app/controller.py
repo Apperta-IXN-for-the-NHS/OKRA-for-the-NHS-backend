@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
-from app.knowledge_service import get_article_by_id, get_articles_sorted_by_trending, get_articles_by_query, handle_vote
+from app.service.case_service import get_cases_sorted_by_priority, get_case_by_id
+from app.service.knowledge_service import get_article_by_id, get_articles_sorted_by_trending, get_articles_by_query, handle_vote
 
 api = Blueprint('api', __name__)
 
@@ -71,3 +72,27 @@ def vote(article_id):
         return '', 400
 
     return '', 200 if handle_vote(article_id, client_id, direction) else 400
+
+
+@api.route('/cases/<case_id>', methods=['GET'])
+def get_case(case_id):
+    case = get_case_by_id(case_id)
+    # if not found, return 404
+    return jsonify(case), 200 if case else 404
+
+
+@api.route('/cases', methods=['GET'])
+def get_cases():
+    limit = request.args.get('limit')
+    if limit is None:
+        limit = 5
+
+    start = request.args.get('start')
+    if start is None:
+        start = 0
+
+    query = request.args.get('query')
+
+    case_list = get_cases_sorted_by_priority(query, limit, start)
+
+    return jsonify(case_list), 200 if case_list else 404

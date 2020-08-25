@@ -9,18 +9,26 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 db.Model.metadata.reflect(db.engine)
 
+
 # get table schema
 class Article(db.Model):
     __table__ = db.Model.metadata.tables['kb_knowledge']
 
+
 class RelatedArticles(db.Model):
     __table__ = db.Model.metadata.tables['related_knowledge']
+
 
 class KnowledgeScore(db.Model):
     __table__ = db.Model.metadata.tables['kb_knowledge_score']
 
+
 class Vote(db.Model):
     __table__ = db.Model.metadata.tables['vote_record']
+
+
+class Case(db.Model):
+    __table__ = db.Model.metadata.tables['case']
 
 
 from app.controller import api
