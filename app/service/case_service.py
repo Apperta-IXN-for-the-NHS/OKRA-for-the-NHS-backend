@@ -1,4 +1,5 @@
-from app import Case, db
+from datetime import datetime
+from app import Case, db, SearchHistory
 
 
 # return dictionary format of case info
@@ -27,6 +28,11 @@ def get_cases_sorted_by_priority(query, limit, start):
     if query is None:
         res = Case.query.order_by(Case.priority, Case.opened.desc(), Case.sys_id).offset(start).limit(limit)
     else:
+        # save query
+        history = SearchHistory(type="case", content=query, search_date=datetime.now())
+        db.session.add(history)
+        db.session.commit()
+
         res = Case.query.filter(Case.short_description.ilike(f"%{query}%")).order_by(Case.priority, Case.opened.desc(), Case.sys_id).offset(start).limit(limit)
     return [get_case_info(case) for case in res]
 

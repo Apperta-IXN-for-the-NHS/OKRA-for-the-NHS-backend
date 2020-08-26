@@ -1,4 +1,6 @@
-from app import Article, RelatedArticles, db, KnowledgeScore
+from datetime import datetime
+
+from app import Article, RelatedArticles, db, KnowledgeScore, SearchHistory
 
 
 # return required info about articles
@@ -88,6 +90,11 @@ def get_articles_sorted_by_trending(limit, start):
 
 # return articles searched by query
 def get_articles_by_query(query, limit, start):
+    # save query
+    history = SearchHistory(type="knowledge", content=query, search_date=datetime.now())
+    db.session.add(history)
+    db.session.commit()
+
     # search
     res = Article.query.filter(Article.short_description.ilike(f"%{query}%")).offset(start).limit(limit)
     article_ids = [article.sys_id for article in res]
