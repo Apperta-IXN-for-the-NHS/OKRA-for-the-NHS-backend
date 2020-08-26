@@ -1,4 +1,4 @@
-from app import Case
+from app import Case, db
 
 
 def get_case_info(case):
@@ -25,3 +25,9 @@ def get_cases_sorted_by_priority(query, limit, start):
     else:
         res = Case.query.filter(Case.short_description.ilike(f"%{query}%")).order_by(Case.priority, Case.opened.desc(), Case.sys_id).offset(start).limit(limit)
     return [get_case_info(case) for case in res]
+
+
+def add_case_into_db(sys_id, short_description, content, priority, opened):
+    case = Case(sys_id=sys_id, short_description=short_description, content=content, priority=priority, opened=opened)
+    db.session.add(case)
+    db.session.commit()

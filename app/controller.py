@@ -1,6 +1,8 @@
 from flask import Blueprint, request, jsonify
-from app.service.case_service import get_cases_sorted_by_priority, get_case_by_id
+from app.service.case_service import get_cases_sorted_by_priority, get_case_by_id, add_case_into_db
 from app.service.knowledge_service import get_article_by_id, get_articles_sorted_by_trending, get_articles_by_query, handle_vote
+import uuid
+from datetime import date
 
 api = Blueprint('api', __name__)
 
@@ -96,3 +98,19 @@ def get_cases():
     case_list = get_cases_sorted_by_priority(query, limit, start)
 
     return jsonify(case_list), 200 if case_list else 404
+
+
+@api.route('/cases', methods=['POST'])
+def add_case():
+    req = request.get_json()
+    if not {'title', 'body', 'priority'}.issubset(req):
+        return 'missing title, body or priority', 400
+
+    short_description = req['title']
+    content = req['body']
+    priority = req['priority']
+    sys_id = uuid.uuid4().hex
+    opened = date.today()
+
+    add_case_into_db(sys_id, short_description, content, priority, opened)
+    return '', 200
