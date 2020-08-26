@@ -61,6 +61,11 @@ def get_articles():
     return jsonify(article_list), 200 if article_list else 404
 
 
+# vote a knowledge article
+# accept a POST request with JSON
+#{
+#   "direction": -1/0/1
+#}
 @api.route('/articles/<article_id>/vote', methods=['POST'])
 def vote(article_id):
     req = request.get_json()
@@ -76,6 +81,16 @@ def vote(article_id):
     return '', 200 if handle_vote(article_id, client_id, direction) else 400
 
 
+
+# get a case by id
+# return JSON
+# {
+# 	"id": "string",
+# 	"title": "string",
+# 	"body": "string",
+# 	"priority": 1-4,
+# 	"date": "string"
+# }
 @api.route('/cases/<case_id>', methods=['GET'])
 def get_case(case_id):
     case = get_case_by_id(case_id)
@@ -83,6 +98,15 @@ def get_case(case_id):
     return jsonify(case), 200 if case else 404
 
 
+# get cases
+# return JSON
+# [{
+# 	"id": "string",
+# 	"title": "string",
+# 	"body": "string",
+# 	"priority": 1-4,
+# 	"date": "string"
+# }]
 @api.route('/cases', methods=['GET'])
 def get_cases():
     limit = request.args.get('limit')
@@ -100,6 +124,13 @@ def get_cases():
     return jsonify(case_list), 200 if case_list else 404
 
 
+# add a case into the db
+# accept JSON
+# {
+# 	"title": "string",
+# 	"body": "string",
+# 	"priority": 1-4
+# }
 @api.route('/cases', methods=['POST'])
 def add_case():
     req = request.get_json()
