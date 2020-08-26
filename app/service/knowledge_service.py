@@ -1,4 +1,4 @@
-from app import Article, RelatedArticles, db, KnowledgeScore, Vote
+from app import Article, RelatedArticles, db, KnowledgeScore
 
 
 # return brief info on articles
@@ -91,34 +91,15 @@ def get_articles_by_query(query, limit, start):
     return [article_id_info[article.sys_id] for article in article_objs]
 
 
-def handle_vote(article_id, client_id, direction):
+def handle_vote(article_id, previous, current):
     # if the article does not exist, return false
     if Article.query.filter_by(sys_id=article_id).first() is None:
         return False
 
-    res = Vote.query.filter_by(sys_id=article_id, client_id=client_id).first()
-    # if no previous record, add new one
-    if res is None:
-        # if no record in db but get 0 to cancel the record, return false
-        if direction == 0:
-            return False
-        res = Vote(sys_id=article_id, client_id=client_id, vote=direction)
-        diff = direction
-        db.session.add(res)
-    else:
-        # if have, find the previous one
-        prev = res.vote
-        # if equals 0, means the user cancel his like/dislike
-        # remove the record to avoid too much data in the table
-        if direction == 0:
-            db.session.delete(res)
-        else:
-            # if not, update to the new one
-            res.vote = direction
-        # calculate the difference
-        diff = direction - prev
-
     score = KnowledgeScore.query.filter_by(sys_id=article_id).first()
-    score.net_votes += diff
+    if score is None:
+        return False
+
+    score.net_votes += current - previous
     db.session.commit()
     return True

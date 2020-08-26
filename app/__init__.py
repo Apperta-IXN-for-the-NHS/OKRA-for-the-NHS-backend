@@ -23,10 +23,6 @@ class KnowledgeScore(db.Model):
     __table__ = db.Model.metadata.tables['kb_knowledge_score']
 
 
-class Vote(db.Model):
-    __table__ = db.Model.metadata.tables['vote_record']
-
-
 class Case(db.Model):
     __table__ = db.Model.metadata.tables['case']
 

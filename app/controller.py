@@ -64,22 +64,25 @@ def get_articles():
 # vote a knowledge article
 # accept a POST request with JSON
 #{
-#   "direction": -1/0/1
+#   "previous": -1/0/1,
+#   "current": -1/0/1
 #}
 @api.route('/articles/<article_id>/vote', methods=['POST'])
 def vote(article_id):
     req = request.get_json()
-    if not {'clientId', 'direction'}.issubset(req):
-        return '', 400
+    if not {'previous', 'current'}.issubset(req):
+        return 'missing previous or current', 400
 
-    client_id = req['clientId']
-    direction = req['direction']
+    previous = req['previous']
+    current = req['current']
 
-    if direction not in [-1, 0, 1]:
-        return '', 400
+    if previous not in [-1, 0, 1] or current not in [-1, 0, 1]:
+        return 'wrong value for previous or current', 400
 
-    return '', 200 if handle_vote(article_id, client_id, direction) else 400
-
+    if handle_vote(article_id, previous, current):
+        return '', 200
+    else:
+        return 'cannot find the knowledge article', 400
 
 
 # get a case by id
