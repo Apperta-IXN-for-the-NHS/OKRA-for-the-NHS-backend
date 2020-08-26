@@ -61,10 +61,13 @@ def get_articles():
 @api.route('/articles/<article_id>/vote', methods=['POST'])
 def vote(article_id):
     req = request.get_json()
-    client_id = req['clientId']
-    vote = req['direction']
-
-    if vote not in [-1, 0, 1]:
+    if not {'clientId', 'direction'}.issubset(req):
         return '', 400
 
-    return '', 200 if handle_vote(article_id, client_id, vote) else 400
+    client_id = req['clientId']
+    direction = req['direction']
+
+    if direction not in [-1, 0, 1]:
+        return '', 400
+
+    return '', 200 if handle_vote(article_id, client_id, direction) else 400
