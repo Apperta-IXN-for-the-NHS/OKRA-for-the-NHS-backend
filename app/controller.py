@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from app.service.case_service import get_cases_sorted_by_priority, get_case_by_id, add_case_into_db
+from app.service.case_service import get_cases_sorted_by_date_and_priority, get_case_by_id, add_case_into_db
 from app.service.knowledge_service import get_article_by_id, get_articles_sorted_by_trending, get_articles_by_query, handle_vote
 import uuid
 from datetime import date
@@ -122,7 +122,7 @@ def get_cases():
 
     query = request.args.get('query')
 
-    case_list = get_cases_sorted_by_priority(query, limit, start)
+    case_list = get_cases_sorted_by_date_and_priority(query, limit, start)
 
     return jsonify(case_list), 200 if case_list else 404
 

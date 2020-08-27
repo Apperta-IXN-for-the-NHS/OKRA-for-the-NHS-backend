@@ -24,16 +24,16 @@ def get_case_by_id(case_id):
 
 # return a list of cases sorted by priority (1 is the highest priority, 4 is the lowest)
 # if a request has the query parameter, then search in the db first
-def get_cases_sorted_by_priority(query, limit, start):
+def get_cases_sorted_by_date_and_priority(query, limit, start):
     if query is None:
-        res = Case.query.order_by(Case.priority, Case.opened.desc(), Case.sys_id).offset(start).limit(limit)
+        res = Case.query.order_by(Case.opened.desc(), Case.priority, Case.sys_id).offset(start).limit(limit)
     else:
         # save query
         history = SearchHistory(type="case", content=query, search_date=datetime.now())
         db.session.add(history)
         db.session.commit()
 
-        res = Case.query.filter(Case.short_description.ilike(f"%{query}%")).order_by(Case.priority, Case.opened.desc(), Case.sys_id).offset(start).limit(limit)
+        res = Case.query.filter(Case.short_description.ilike(f"%{query}%")).order_by(Case.opened.desc(), Case.priority, Case.sys_id).offset(start).limit(limit)
     return [get_case_info(case) for case in res]
 
 
