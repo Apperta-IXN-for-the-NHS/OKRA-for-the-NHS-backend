@@ -1,5 +1,9 @@
+requests
 gunicorn
 gevent
 flask
 flask_sqlalchemy
 psycopg2-binary
+gensim
+nltk
+apscheduler

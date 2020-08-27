@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 from app.knowledge_service import get_article_by_id, get_articles_sorted_by_date, get_articles_by_query
+from app.trending_service import update_trending, update_related
 
 api = Blueprint('api', __name__)
 
@@ -56,3 +57,18 @@ def get_articles():
         article_list = get_articles_by_query(query, limit, start)
 
     return jsonify(article_list), 200 if article_list else 404
+
+
+# this api handler updates trending score updates
+@api.route('/update/trending', methods=['POST'])
+def update_trending_score():
+    d = update_trending()
+    # if not found, return 404
+    return "success", 200 if d else 404
+
+
+@api.route('/update/related', methods=['POST'])
+def update_related_score():
+    d = update_related()
+    # if not found, return 404
+    return "success", 200 if d else 404
