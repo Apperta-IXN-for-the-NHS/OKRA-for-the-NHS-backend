@@ -144,7 +144,7 @@ def add_case():
     content = req['body']
     priority = req['priority']
     sys_id = uuid.uuid4().hex
-    opened = date.today()
+    submitted = date.today()
 
-    add_case_into_db(sys_id, short_description, content, priority, opened)
+    add_case_into_db(sys_id, short_description, content, priority, submitted)
     return '', 200
