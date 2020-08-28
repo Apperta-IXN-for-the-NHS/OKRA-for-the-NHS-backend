@@ -26,7 +26,7 @@ def get_case_by_id(case_id: str) -> dict:
     :param case_id: the id of a Case object
     :return: a dict of case info
     """
-    res = Case.query.filter_by(sys_id=case_id).first()
+    res = Case.query.filter_by(sys_id=case_id).limit(1).first()
 
     # if not exist, return empty dictionary
     if res is None:

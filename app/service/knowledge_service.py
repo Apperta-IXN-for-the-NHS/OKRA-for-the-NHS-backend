@@ -67,7 +67,7 @@ def get_article_all_info(article: Article) -> dict:
         :param article_obj: an Article object
         :return: the net_votes of the Article object
         """
-        score = KnowledgeScore.query.filter_by(sys_id=article_obj.sys_id).first()
+        score = KnowledgeScore.query.filter_by(sys_id=article_obj.sys_id).limit(1).first()
         return score.net_votes if score else 0
 
     return {'id': article.sys_id if article.sys_id else '',
@@ -86,7 +86,7 @@ def get_article_by_id(article_id: str) -> dict:
     :param article_id: the id of an article
     :return: the article info with content
     """
-    res = Article.query.filter_by(sys_id=article_id).first()
+    res = Article.query.filter_by(sys_id=article_id).limit(1).first()
 
     # if not exist, return empty dictionary
     if res is None:
@@ -160,10 +160,10 @@ def handle_vote(article_id: str, previous: int, current: int) -> bool:
     """
 
     # if the article does not exist, return false
-    if Article.query.filter_by(sys_id=article_id).first() is None:
+    if Article.query.filter_by(sys_id=article_id).limit(1).first() is None:
         return False
 
-    score = KnowledgeScore.query.filter_by(sys_id=article_id).first()
+    score = KnowledgeScore.query.filter_by(sys_id=article_id).limit(1).first()
     if score is None:
         return False
 
