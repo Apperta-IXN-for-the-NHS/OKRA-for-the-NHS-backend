@@ -4,10 +4,10 @@ This is the controller of the back-end application.
 It provides REST APIs, handles requests and returns responses.
 """
 from flask import Blueprint, request, jsonify
-from app.service.case_service import get_cases_sorted_by_date_and_priority, get_case_by_id, add_case_into_db
-from app.service.knowledge_service import get_article_by_id, get_articles_sorted_by_trending, get_articles_by_query, handle_vote
-import uuid
-from datetime import date
+from app.service.case_service import get_cases_sorted_by_date_and_priority, get_case_by_id, add_new_case
+from app.service.knowledge_service import get_article_by_id, get_articles_sorted_by_trending, get_articles_by_query, \
+    handle_vote, add_new_article
+
 
 api = Blueprint('api', __name__)
 
@@ -96,6 +96,30 @@ def get_articles() -> (str, int):
         article_list = get_articles_by_query(query, limit, start)
 
     return jsonify(article_list), 200 if article_list else 404
+
+
+@api.route('/articles', methods=['POST'])
+def add_article() -> (str, int):
+    """Add a new article.
+
+    Accept JSON format requests with the following keys:
+    - short_description: string, article title
+    - author: string, article author
+    - text: string, article content
+
+    There could be other optional keys: number, kb_category, article_type,
+    kb_knowledge_base, published, sys_tags, sys_view_count
+
+    :return: messages and status code
+    """
+    req = request.get_json()
+    if not {'short_description', 'author', 'text'}.issubset(req):
+        return 'require short_description, author and text', 400
+
+    if add_new_article(req):
+        return '', 200
+    else:
+        return 'cannot add into db', 400
 
 
 @api.route('/articles/<article_id>/vote', methods=['POST'])
@@ -222,8 +246,8 @@ def add_case() -> (str, int):
     short_description = req['title']
     content = req['body']
     priority = req['priority']
-    sys_id = uuid.uuid4().hex
-    submitted = date.today()
 
-    add_case_into_db(sys_id, short_description, content, priority, submitted)
-    return '', 200
+    if add_new_case(short_description, content, priority):
+        return '', 200
+    else:
+        return 'cannot add to db', 400

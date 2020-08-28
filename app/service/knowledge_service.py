@@ -1,7 +1,9 @@
 """
 This is the module providing services for knowledge articles.
 """
+import uuid
 from datetime import datetime
+from sqlalchemy.exc import IntegrityError
 from app import Article, RelatedArticles, db, KnowledgeScore, SearchHistory
 
 
@@ -168,3 +170,29 @@ def handle_vote(article_id: str, previous: int, current: int) -> bool:
     score.net_votes += current - previous
     db.session.commit()
     return True
+
+
+def add_new_article(info) -> bool:
+    """Add a new article to the db.
+
+    :param info: article info
+    :return: True for success, False for failure
+    """
+    try:
+        article = Article(sys_id=uuid.uuid4().hex,
+                          number=info['number'] if 'number' in info else None,
+                          short_description=info['short_description'],
+                          author=info['author'],
+                          kb_category=info['kb_category'] if 'kb_category' in info else None,
+                          text=info['text'],
+                          article_type=info['article_type'] if 'article_type' in info else None,
+                          kb_knowledge_base=info['kb_knowledge_base'] if 'kb_knowledge_base' in info else None,
+                          published=info['published'] if 'published' in info else None,
+                          sys_tags=info['sys_tags'] if 'sys_tags' in info else None,
+                          sys_view_count=info['sys_view_count'] if 'sys_view_count' in info else None
+                          )
+        db.session.add(article)
+        db.session.commit()
+        return True
+    except IntegrityError:
+        return False

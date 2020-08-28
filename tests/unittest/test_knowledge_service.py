@@ -76,6 +76,14 @@ class RestAPITests(unittest.TestCase):
                                     content_type='application/json')
         self.assertTrue('400' in response.status)
 
+    def test_add_article(self):
+        response = self.tester.post('/articles',
+                                    data=json.dumps({'short_description': 'add_article_test',
+                                                     'text': 'This is the test for adding articles',
+                                                     'author': 'wentao'}),
+                                    content_type='application/json')
+        print(response, response.status)
+        self.assertTrue('200' in response.status)
 
 if __name__ == '__main__':
     unittest.main()
