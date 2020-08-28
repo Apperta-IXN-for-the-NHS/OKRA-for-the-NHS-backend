@@ -52,11 +52,11 @@ class RestAPITests(unittest.TestCase):
                                     content_type='application/json')
         self.assertTrue('200' in response.status)
 
-    def test_down_vote(self):
-        response = self.tester.post('/articles/a746226a1bb954106281fcc1cd4bcb7a/vote',
-                                    data=json.dumps({'previous': 0, 'current': -1}),
-                                    content_type='application/json')
-        self.assertTrue('200' in response.status)
+    # def test_down_vote(self):
+    #     response = self.tester.post('/articles/a746226a1bb954106281fcc1cd4bcb7a/vote',
+    #                                 data=json.dumps({'previous': 0, 'current': -1}),
+    #                                 content_type='application/json')
+    #     self.assertTrue('200' in response.status)
 
     def test_cancel_vote(self):
         response = self.tester.post('/articles/a746226a1bb954106281fcc1cd4bcb7a/vote',
@@ -76,14 +76,31 @@ class RestAPITests(unittest.TestCase):
                                     content_type='application/json')
         self.assertTrue('400' in response.status)
 
-    def test_add_article(self):
+    # def test_add_article(self):
+    #     response = self.tester.post('/articles',
+    #                                 data=json.dumps({'short_description': 'add_article_test',
+    #                                                  'text': 'This is the test for adding articles',
+    #                                                  'author': 'wentao'}),
+    #                                 content_type='application/json')
+    #     print(response, response.status)
+    #     self.assertTrue('200' in response.status)
+
+    def test_add_article_missing_author(self):
         response = self.tester.post('/articles',
                                     data=json.dumps({'short_description': 'add_article_test',
-                                                     'text': 'This is the test for adding articles',
+                                                     'text': 'This is the test for adding articles'}),
+                                    content_type='application/json')
+        print(response, response.status)
+        self.assertTrue('400' in response.status)
+
+    def test_add_article_missing_title(self):
+        response = self.tester.post('/articles',
+                                    data=json.dumps({'text': 'This is the test for adding articles',
                                                      'author': 'wentao'}),
                                     content_type='application/json')
         print(response, response.status)
-        self.assertTrue('200' in response.status)
+        self.assertTrue('400' in response.status)
+
 
 if __name__ == '__main__':
     unittest.main()
