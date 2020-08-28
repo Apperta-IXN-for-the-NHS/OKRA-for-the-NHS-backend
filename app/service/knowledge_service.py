@@ -1,10 +1,17 @@
+"""
+This is the module providing services for knowledge articles.
+"""
 from datetime import datetime
-
 from app import Article, RelatedArticles, db, KnowledgeScore, SearchHistory
 
 
-# return required info about articles
-def get_article_brief_info(article, article_id_net_votes):
+def get_article_brief_info(article: Article, article_id_net_votes: dict) -> dict:
+    """Get information about an article without article content.
+
+    :param article: an Article object.
+    :param article_id_net_votes: a dictionary, key is article id and value is net_votes.
+    :return: a dict of the article info without content
+    """
     return {'id': article.sys_id if article.sys_id else '',
             'title': article.short_description if article.short_description else '',
             'author': article.author if article.author else '',
@@ -13,11 +20,21 @@ def get_article_brief_info(article, article_id_net_votes):
             'net_votes': article_id_net_votes[article.sys_id] if article.sys_id in article_id_net_votes else 0}
 
 
-def get_article_all_info(res):
-    # return info about the related articles
-    def get_related_articles(related_id):
+def get_article_all_info(article: Article) -> dict:
+    """Get information about an article with article content.
+
+    :param article: an Article object
+    :return: a dict of article info with content
+    """
+    def get_related_articles(article_id: str) -> list:
+        """Get related articles.
+
+        :param article_id: the id of an article
+        :return: a list of article info without content
+        """
+
         # find related articles and their similarity scores, id -> similarity score
-        related_articles = RelatedArticles.query.filter_by(sys_id=related_id).order_by(RelatedArticles.score.desc())
+        related_articles = RelatedArticles.query.filter_by(sys_id=article_id).order_by(RelatedArticles.score.desc())
         related_id_similarity = {related.number: related.score for related in related_articles}
         related_ids = related_id_similarity.keys()
 
@@ -33,31 +50,40 @@ def get_article_all_info(res):
 
         # calculate total score and sort in descending order
         related_id_total = {}
-        for related_id in related_ids:
-            similarity_score = 0.5 * related_id_similarity[related_id] if related_id in related_id_similarity else 0
-            trending_score = 0.5 * related_id_trending[related_id] if related_id in related_id_trending else 0
-            related_id_total[related_id] = similarity_score + trending_score
+        for article_id in related_ids:
+            similarity_score = 0.5 * related_id_similarity[article_id] if article_id in related_id_similarity else 0
+            trending_score = 0.5 * related_id_trending[article_id] if article_id in related_id_trending else 0
+            related_id_total[article_id] = similarity_score + trending_score
         sorted_ids = sorted(related_id_total.keys(), key=lambda x: x[1], reverse=True)
 
         # retrieve article info and output
         return [related_id_info[article_id] for article_id in sorted_ids]
 
-    def get_net_votes(article):
-        score = KnowledgeScore.query.filter_by(sys_id=article.sys_id).first()
+    def get_net_votes(article_obj: Article) -> float:
+        """Get net_votes of the article
+
+        :param article_obj: an Article object
+        :return: the net_votes of the Article object
+        """
+        score = KnowledgeScore.query.filter_by(sys_id=article_obj.sys_id).first()
         return score.net_votes if score else 0
 
-    return {'id': res.sys_id if res.sys_id else '',
-            'title': res.short_description if res.short_description else '',
-            'author': res.author if res.author else '',
-            'created': res.published.strftime("%Y-%m-%d") if res.published else '',
-            'body': res.text if res.text else '',
-            'view_count': res.sys_view_count if res.sys_view_count else 0,
-            'related': get_related_articles(res.sys_id),
-            'net_votes': get_net_votes(res)}
+    return {'id': article.sys_id if article.sys_id else '',
+            'title': article.short_description if article.short_description else '',
+            'author': article.author if article.author else '',
+            'created': article.published.strftime("%Y-%m-%d") if article.published else '',
+            'body': article.text if article.text else '',
+            'view_count': article.sys_view_count if article.sys_view_count else 0,
+            'related': get_related_articles(article.sys_id),
+            'net_votes': get_net_votes(article)}
 
 
-# return article info with a specified id
-def get_article_by_id(article_id):
+def get_article_by_id(article_id: str) -> dict:
+    """Get the info of the article with specified id.
+
+    :param article_id: the id of an article
+    :return: the article info with content
+    """
     res = Article.query.filter_by(sys_id=article_id).first()
 
     # if not exist, return empty dictionary
@@ -71,9 +97,15 @@ def get_article_by_id(article_id):
     return get_article_all_info(res)
 
 
-# return articles sorted by trending score
-def get_articles_sorted_by_trending(limit, start):
-    # find the id of the top 10 article sorted by trending score
+def get_articles_sorted_by_trending(limit: int, start: int) -> list:
+    """Get a list of articles which is sorted by trending score.
+
+    :param limit: number of returned articles
+    :param start: start index
+    :return: a list of article info without content
+    """
+
+    # find the id of the top articles sorted by trending score
     res = KnowledgeScore.query.order_by(KnowledgeScore.trending_score.desc(), KnowledgeScore.published.desc(), KnowledgeScore.sys_id).offset(start).limit(limit)
     article_ids = [article.sys_id for article in res]
     # find their information according to the id
@@ -88,8 +120,15 @@ def get_articles_sorted_by_trending(limit, start):
     return [article_id_info[article_id] for article_id in article_ids]
 
 
-# return articles searched by query
-def get_articles_by_query(query, limit, start):
+def get_articles_by_query(query: str, limit: int, start: int) -> list:
+    """Get articles searched by query
+
+    :param query: search query
+    :param limit: number of returned articles
+    :param start: start index
+    :return: a list of article info without content
+    """
+
     # save query
     history = SearchHistory(type="knowledge", content=query, search_date=datetime.now())
     db.session.add(history)
@@ -109,7 +148,15 @@ def get_articles_by_query(query, limit, start):
     return [article_id_info[article.sys_id] for article in scores]
 
 
-def handle_vote(article_id, previous, current):
+def handle_vote(article_id: str, previous: int, current: int) -> bool:
+    """Calculate net votes and update db.
+
+    :param article_id: the id of an article
+    :param previous: a user's previous vote
+    :param current: the user's current vote
+    :return: True for success, False for failure
+    """
+
     # if the article does not exist, return false
     if Article.query.filter_by(sys_id=article_id).first() is None:
         return False
