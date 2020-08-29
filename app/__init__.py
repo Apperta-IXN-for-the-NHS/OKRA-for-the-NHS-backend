@@ -4,7 +4,7 @@ This module contains the Flask configuration and Flask-SQLAlchemy configuration.
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-
+from sqlalchemy.ext.automap import automap_base
 
 app = Flask(__name__)
 
@@ -12,6 +12,12 @@ app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:%40EMIS123@162.62
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 db.Model.metadata.reflect(db.engine)
+
+
+Base = automap_base()
+Base.prepare(db.engine, reflect=True)
+knowledge_score_table = Base.classes.kb_knowledge_score
+related_article = Base.classes.related_knowledge
 
 
 # get table schema

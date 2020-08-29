@@ -7,7 +7,7 @@ from flask import Blueprint, request, jsonify
 from app.service.case_service import get_cases_sorted_by_date_and_priority, get_case_by_id, add_new_case
 from app.service.knowledge_service import get_article_by_id, get_articles_sorted_by_trending, get_articles_by_query, \
     handle_vote, add_new_article
-
+from app.trending_service import update_trending, update_related
 
 api = Blueprint('api', __name__)
 
@@ -251,3 +251,18 @@ def add_case() -> (str, int):
         return '', 200
     else:
         return 'cannot add to db', 400
+
+
+# this api handler updates trending score updates
+@api.route('/update/trending', methods=['POST'])
+def update_trending_score():
+    d = update_trending()
+    # if not found, return 404
+    return "success", 200 if d else 404
+
+
+@api.route('/update/related', methods=['POST'])
+def update_related_score():
+    d = update_related()
+    # if not found, return 404
+    return "success", 200 if d else 404
