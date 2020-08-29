@@ -1,11 +1,6 @@
-import csv
-import json
 import operator
 import re
-import time
-import requests
 import gensim.models
-from gensim.models import word2vec
 import numpy as np
 import scipy
 from nltk.corpus import stopwords

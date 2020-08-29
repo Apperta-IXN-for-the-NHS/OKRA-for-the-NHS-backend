@@ -1,8 +1,7 @@
-from app import Article
 from app import recommendation
 from app import db
 from app import knowledge_score_table, related_article
-from app import knowledge_service
+from app.service import knowledge_service
 from app import KnowledgeScore, TestKnowledgeScore
 
 

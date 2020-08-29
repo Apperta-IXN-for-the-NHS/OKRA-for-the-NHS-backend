@@ -84,5 +84,9 @@ class SearchHistory(db.Model):
     __table__ = db.Model.metadata.tables['search_history']
 
 
+class TestKnowledgeScore(db.Model):
+    __table__ = db.Model.metadata.tables['test_related']
+
+
 from app.controller import api
 app.register_blueprint(api)
