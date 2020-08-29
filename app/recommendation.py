@@ -21,20 +21,20 @@ def pre_process(content):
 
 #  uncomment to run initial model training and prediction on similairty
 def cosine_similarity(d1, d2, model):
-    d1Vocabs = [word for word in d1 if word in model.vocab]
-    d2Vocabs = [word for word in d2 if word in model.vocab]
+    d1_vocabs = [word for word in d1 if word in model.vocab]
+    d2_vocabs = [word for word in d2 if word in model.vocab]
 
-    d1Vector = np.mean(model[d1Vocabs], axis=0)
-    d2Vector = np.mean(model[d2Vocabs], axis=0)
-    cosine_score = 1.0 - scipy.spatial.distance.cosine(d1Vector, d2Vector)
+    d1_vector = np.mean(model[d1_vocabs], axis=0)
+    d2_vector = np.mean(model[d2_vocabs], axis=0)
+    cosine_score = 1.0 - scipy.spatial.distance.cosine(d1_vector, d2_vector)
     return cosine_score
 
 
 def update_related(all_article):
     path = 'GoogleNews-vectors-negative300-SLIM.bin'
     model = gensim.models.KeyedVectors.load_word2vec_format(path, binary=True)
-    knowledgeDict = {}
-    knowledgeNumberList = []
+    knowledge_dict = {}
+    knowledge_number_list = []
     for article in all_article:
         if article['short_description'] is not None:
             short_description = article['short_description']
@@ -44,65 +44,60 @@ def update_related(all_article):
             body = article['body']
         else:
             body = ''
-        knowledgeDict[article['sys_id']] = pre_process(remove_tags(short_description
-                                                                   + body + "used for remove bug"))
-        knowledgeNumberList.append(article['sys_id'])
+        knowledge_dict[article['sys_id']] = pre_process(remove_tags(short_description + body + "used for remove bug"))
+        knowledge_number_list.append(article['sys_id'])
 
-    return sort_knowledgeScore(knowledgeDict, knowledgeNumberList, model)
+    return sort_knowledge_score(knowledge_dict, knowledge_number_list, model)
 
 
-def compute_favoriteScore(articles):
-    knowledgeFavoriteScore = {}
-    sortedKnowledgeFavorite = sorted(articles, key=lambda item: item['net_votes'], reverse=True)
+def compute_favorite_score(articles):
+    knowledge_favorite_score = {}
+    sorted_knowledge_favorite = sorted(articles, key=lambda item: item['net_votes'], reverse=True)
     i = 0
-    for knowledge in sortedKnowledgeFavorite:
+    for knowledge in sorted_knowledge_favorite:
         i += 1
-        knowledgeFavoriteScore[knowledge['sys_id']] = (1.0 - (i / len(sortedKnowledgeFavorite))) * 0.7
+        knowledge_favorite_score[knowledge['sys_id']] = (1.0 - (i / len(sorted_knowledge_favorite))) * 0.7
 
-    return knowledgeFavoriteScore
+    return knowledge_favorite_score
 
 
-def compute_viewScore(articles):
-    knowledgeViewScore = {}
-    sortKnowledgeView = sorted(articles, key=lambda item: item['view_count'], reverse=True)
-    print(sortKnowledgeView)
+def compute_view_score(articles):
+    knowledge_view_score = {}
+    sort_knowledge_view = sorted(articles, key=lambda item: item['view_count'], reverse=True)
+    print(sort_knowledge_view)
     i = 0
-    for knowledge in sortKnowledgeView:
+    for knowledge in sort_knowledge_view:
         i += 1
-        knowledgeViewScore[knowledge['sys_id']] = (1.0 - (i / len(sortKnowledgeView))) * 0.3
-    return knowledgeViewScore
+        knowledge_view_score[knowledge['sys_id']] = (1.0 - (i / len(sort_knowledge_view))) * 0.3
+    return knowledge_view_score
 
 
-def compute_trendingScore(knowledge_favorite_score, knowledge_view_score):
-    knowledgeTrendingScore = {}
+def compute_trending_score(knowledge_favorite_score, knowledge_view_score):
+    knowledge_trending_score = {}
     for knowledge in knowledge_favorite_score:
-        knowledgeTrendingScore[knowledge] = knowledge_view_score[knowledge] + knowledge_favorite_score[knowledge]
-    return knowledgeTrendingScore
+        knowledge_trending_score[knowledge] = knowledge_view_score[knowledge] + knowledge_favorite_score[knowledge]
+    return knowledge_trending_score
 
 
 # this method computes the similarity score and then sort article from high to low.
-def sort_knowledgeScore(knowledge_dict, knowledge_number_list,model):
-    allKnowledgeScore = {}
+def sort_knowledge_score(knowledge_dict, knowledge_number_list, model):
+    all_knowledge_score = {}
     for i in range(len(knowledge_number_list)):
         print(i)
-        knowledgeScore = {}
-        sortedKnowledgeScore = {}
+        knowledge_score = {}
+        sorted_knowledge_score = {}
         for j in range(len(knowledge_number_list)):
-            score = 0.0
-            if i == j:
-                b = 0
-            else:
-                score = cosine_similarity(knowledge_dict[knowledge_number_list[i]], knowledge_dict[knowledge_number_list[j]],model)
-                knowledgeScore[knowledge_number_list[j]] = score
+            if i != j:
+                score = cosine_similarity(knowledge_dict[knowledge_number_list[i]], knowledge_dict[knowledge_number_list[j]], model)
+                knowledge_score[knowledge_number_list[j]] = score
             #     + knowledgeTrendingScore[j]
-            sortedKnowledgeScore = sorted(knowledgeScore.items(), key=operator.itemgetter(1), reverse=True)
-        allKnowledgeScore[knowledge_number_list[i]] = sortedKnowledgeScore
-    return allKnowledgeScore
+            sorted_knowledge_score = sorted(knowledge_score.items(), key=operator.itemgetter(1), reverse=True)
+        all_knowledge_score[knowledge_number_list[i]] = sorted_knowledge_score
+    return all_knowledge_score
 
 
 def return_trending_score(sorted_favorite, sort_view):
-    favoriteScore = compute_favoriteScore(sorted_favorite)
-    viewScore = compute_viewScore(sort_view)
-    TrendingScore = compute_trendingScore(favoriteScore, viewScore)
-    return TrendingScore
-
+    favorite_score = compute_favorite_score(sorted_favorite)
+    view_score = compute_view_score(sort_view)
+    trending_score = compute_trending_score(favorite_score, view_score)
+    return trending_score

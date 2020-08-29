@@ -3,9 +3,7 @@ This is the module providing services for knowledge articles.
 """
 import uuid
 from datetime import datetime
-
 from sqlalchemy.exc import IntegrityError
-
 from app import Article, RelatedArticles, db, KnowledgeScore, SearchHistory, recommendation
 
 
@@ -13,24 +11,20 @@ from app import Article, RelatedArticles, db, KnowledgeScore, SearchHistory, rec
 def get_trending_score_list():
     # get article list with view sorted by published date
     article_view = Article.query.filter(Article.published.isnot(None)).order_by(Article.published.desc()).with_entities(Article.sys_id, Article.sys_view_count)
-    articleSortedByViewList = []
-    articleSortedByNetVotes=[]
+    article_sorted_by_view_list = []
+    article_sorted_by_net_votes = []
     for article in article_view:
-        dict={}
-        dict['sys_id']=article.sys_id
-        dict['view_count'] = article.sys_view_count
-        articleSortedByViewList.append(dict)
+        info = {'sys_id': article.sys_id, 'view_count': article.sys_view_count}
+        article_sorted_by_view_list.append(info)
 
     # get article list with net_votes sorted by published date
     article_favorite = KnowledgeScore.query.filter(KnowledgeScore.published.isnot(None)).order_by(KnowledgeScore.published.desc()).with_entities(
         KnowledgeScore.sys_id, KnowledgeScore.net_votes)
     for article in article_favorite:
-        dict={}
-        dict['sys_id'] = article.sys_id
-        dict['net_votes'] = article.net_votes
-        articleSortedByNetVotes.append(dict)
-    trendingScoreList = recommendation.return_trending_score(articleSortedByNetVotes,articleSortedByViewList)
-    return trendingScoreList
+        info = {'sys_id': article.sys_id, 'net_votes': article.net_votes}
+        article_sorted_by_net_votes.append(info)
+    trending_score_list = recommendation.return_trending_score(article_sorted_by_net_votes, article_sorted_by_view_list)
+    return trending_score_list
 
 
 # this function query all article's information used for similarity computation
@@ -40,23 +34,18 @@ def get_all_article_similarity():
     i = 0
     for article in all_article:
         i += 1
-        dict = {}
-        dict['sys_id'] = article.sys_id
-        dict['short_description'] = article.short_description
-        dict['body'] = article.text
-        all_article_list.append(dict)
+        info = {'sys_id': article.sys_id, 'short_description': article.short_description, 'body': article.text}
+        all_article_list.append(info)
     return all_article_list
 
 
 # this method return date-sorted article with sortable date in db
 def get_articles_date():
-    articleObjs = Article.query.filter(Article.published.isnot(None)).order_by(Article.published.desc())
+    article_objs = Article.query.filter(Article.published.isnot(None)).order_by(Article.published.desc())
     articles = []
-    for article in articleObjs:
-        dict={}
-        dict['id'] = article.sys_id
-        dict['date'] = article.published
-        articles.append(dict)
+    for article in article_objs:
+        info = {'id': article.sys_id, 'date': article.published}
+        articles.append(info)
     return articles
 
 

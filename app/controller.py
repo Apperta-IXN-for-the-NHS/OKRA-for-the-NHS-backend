@@ -7,7 +7,7 @@ from flask import Blueprint, request, jsonify
 from app.service.case_service import get_cases_sorted_by_date_and_priority, get_case_by_id, add_new_case
 from app.service.knowledge_service import get_article_by_id, get_articles_sorted_by_trending, get_articles_by_query, \
     handle_vote, add_new_article
-from app.trending_service import update_trending, update_related
+from app.service.trending_service import update_trending, update_related
 
 api = Blueprint('api', __name__)
 

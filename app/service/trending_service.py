@@ -5,22 +5,22 @@ from app.service import knowledge_service
 from app import KnowledgeScore, TestKnowledgeScore
 
 
-# this method initise the kb_knowledge_score table using published date by ranking.
-def write_trending_to_DB():
+# this method initialise the kb_knowledge_score table using published date by ranking.
+def write_trending_to_db():
     article_list = knowledge_service.get_articles_date()
     for article in article_list:
-        newArticle = knowledge_score_table(sys_id=article['id'], published=article['date'], trending_score=0, net_votes=0)
-        db.session.add(newArticle)
+        new_article = knowledge_score_table(sys_id=article['id'], published=article['date'], trending_score=0, net_votes=0)
+        db.session.add(new_article)
     db.session.commit()
     return 'success'
 
 
-# this method is used to update the trendings_score in kb_knowledge_score
+# this method is used to update the trending_score in kb_knowledge_score
 def update_trending():
     knowledge_trending_score = knowledge_service.get_trending_score_list()
     for knowledge in knowledge_trending_score:
-        editedKnowledge = KnowledgeScore.query.get(knowledge)
-        editedKnowledge.trending_score = knowledge_trending_score[knowledge]
+        edited_knowledge = KnowledgeScore.query.get(knowledge)
+        edited_knowledge.trending_score = knowledge_trending_score[knowledge]
     db.session.commit()
     return "success"
 
@@ -35,10 +35,7 @@ def update_related():
         for article_score in all_article_sorted_by_similarity[article]:
             rank += 1
             if rank <= 10:
-                newRelatedArticle = related_article(sys_id=article, number=article_score[0], score=article_score[1])
-                db.session.add(newRelatedArticle)
+                new_related_article = related_article(sys_id=article, number=article_score[0], score=article_score[1])
+                db.session.add(new_related_article)
     db.session.commit()
     return all_article_sorted_by_similarity
-
-
-#
