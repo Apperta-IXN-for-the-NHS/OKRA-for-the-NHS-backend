@@ -7,8 +7,13 @@ from sqlalchemy.exc import IntegrityError
 from app import Article, RelatedArticles, db, KnowledgeScore, SearchHistory, recommendation
 
 
-# this function computes the trending score for each of the articles
 def get_trending_score_list():
+    """this function use method in recommendation.py to compute the article with trending score
+
+    this function query two tables in the database to find first articles with view_count and articles with net_votes
+
+    :return: a list of article with trending score [{article:trending_score}]
+    """
     # get article list with view sorted by published date
     article_view = Article.query.filter(Article.published.isnot(None)).order_by(Article.published.desc()).with_entities(Article.sys_id, Article.sys_view_count)
     article_sorted_by_view_list = []
@@ -27,8 +32,11 @@ def get_trending_score_list():
     return trending_score_list
 
 
-# this function query all article's information used for similarity computation
 def get_all_article_similarity():
+    """this function query all article's information which required for similarity model.
+
+    :return: a list of dict of article with sys_id, short_description and body
+    """
     all_article = Article.query.all()
     all_article_list = []
     i = 0
@@ -39,8 +47,11 @@ def get_all_article_similarity():
     return all_article_list
 
 
-# this method return date-sorted article with sortable date in db
 def get_articles_date():
+    """this method return date-sorted article with sortable date in db
+
+    :return: a list of dict of article with sortable date format.
+    """
     article_objs = Article.query.filter(Article.published.isnot(None)).order_by(Article.published.desc())
     articles = []
     for article in article_objs:

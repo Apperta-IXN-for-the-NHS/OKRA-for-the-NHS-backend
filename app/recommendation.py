@@ -1,3 +1,6 @@
+"""
+This module contains method of computing articles' similarity and article trending scores
+"""
 import operator
 import re
 import gensim.models
@@ -6,21 +9,38 @@ import scipy
 from nltk.corpus import stopwords
 
 
-# remove <> tags in the ariticle body
 def remove_tags(content):
+    """remove the html tag in article for better a precision
+
+    :param content: the article content(title + body)
+    :return: String with removed article contents
+    """
     return re.sub("<.*?>", " ", content)
 
 
-# preprocessed the data using
 def pre_process(content):
+    """preprocess the content, includes remove stop word, remove non-alphabet in the content.
+
+    :param content: the article content(title + body)
+    :return: List of String with pre-processed words.
+    """
     stop_word = stopwords.words('english')
     words = [word for word in content.split(' ') if word.isalpha()]
     words = [word for word in words if word not in stop_word]
     return words
 
 
-#  uncomment to run initial model training and prediction on similairty
 def cosine_similarity(d1, d2, model):
+    """compare similarity between two documents,
+
+    This method convert documents content into vectors using word2vec model,
+    then compare the vector using cosine similarity.
+
+    :param d1: document 1's content in list of word
+    :param d2: document 2's content in list of word
+    :param model: the word2vec model loaded.
+    :return: different in score between d1 and d2
+    """
     d1_vocabs = [word for word in d1 if word in model.vocab]
     d2_vocabs = [word for word in d2 if word in model.vocab]
 
@@ -31,6 +51,14 @@ def cosine_similarity(d1, d2, model):
 
 
 def update_related(all_article):
+    """this method update the related_article table
+
+    pre-process includes remove html tag, delete english stop words,
+    remove non-alphabet and add dummy string to help the produce a valid vectors
+
+    :param all_article: a list of articles with short description, body(content) and sys_id, [{articles: {sys_id:...}}]
+    :return: sorted_knowledge_score(method for computes similarity of documents and sort from high to low)
+    """
     path = 'GoogleNews-vectors-negative300-SLIM.bin'
     model = gensim.models.KeyedVectors.load_word2vec_format(path, binary=True)
     knowledge_dict = {}
@@ -51,6 +79,14 @@ def update_related(all_article):
 
 
 def compute_favorite_score(articles):
+    """this method computes favorites score of articles, which contributes 70% of trending score
+
+    favorite score use a ranking that is based on net_votes of articles,
+    is if rank = 1, then score = 1 - 1(rank)/ article amounts
+
+    :param articles: a list of articles with net_votes [{article:net_votes}]
+    :return: list of articles with favorite score. [{article:favorite_score}]
+    """
     knowledge_favorite_score = {}
     sorted_knowledge_favorite = sorted(articles, key=lambda item: item['net_votes'], reverse=True)
     i = 0
@@ -62,6 +98,14 @@ def compute_favorite_score(articles):
 
 
 def compute_view_score(articles):
+    """this method computes view score of articles, which contributes 30% of trending score
+
+    view score use a ranking that is based on net_view of articles,
+    is if rank = 1, then score = 1 - 1(rank)/ article amounts
+
+    :param articles: a list of articles with view_count [{article:view_count}]
+    :return: list of articles with view score. [{article:viewScore}]
+    """
     knowledge_view_score = {}
     sort_knowledge_view = sorted(articles, key=lambda item: item['view_count'], reverse=True)
     print(sort_knowledge_view)
@@ -73,14 +117,29 @@ def compute_view_score(articles):
 
 
 def compute_trending_score(knowledge_favorite_score, knowledge_view_score):
+    """this method computes trending score of articles,
+    made use of compute_view_score and compute_favorite_score methods.
+
+
+    :param knowledge_favorite_score: a list of articles with view_count
+    :param knowledge_view_score: a list of articles with view_count
+    :return: list of articles with trending score.[{article:trendingScore}]
+    """
     knowledge_trending_score = {}
     for knowledge in knowledge_favorite_score:
         knowledge_trending_score[knowledge] = knowledge_view_score[knowledge] + knowledge_favorite_score[knowledge]
     return knowledge_trending_score
 
 
-# this method computes the similarity score and then sort article from high to low.
 def sort_knowledge_score(knowledge_dict, knowledge_number_list, model):
+    """this method computes the similarity score of articles to all articles
+    and then sort articles using similarity score from high to low.
+
+    :param knowledge_dict: a list of articles with words in list, [{knowledge: [words...]}]
+    :param knowledge_number_list: list of knowledge Numbers [knowldgeNumber,....]
+    :param model: the word2vec model loaded.
+    :return: list of articles with list of similarity score of all articles
+    """
     all_knowledge_score = {}
     for i in range(len(knowledge_number_list)):
         print(i)
@@ -97,6 +156,12 @@ def sort_knowledge_score(knowledge_dict, knowledge_number_list, model):
 
 
 def return_trending_score(sorted_favorite, sort_view):
+    """this method used by the knowledge_service function to compute list of article with trending score
+
+    :param sorted_favorite: list of articles with net_votes sorted by date.
+    :param sort_view: list of articles with view_count sorted by date.
+    :return: list of article with trending score
+    """
     favorite_score = compute_favorite_score(sorted_favorite)
     view_score = compute_view_score(sort_view)
     trending_score = compute_trending_score(favorite_score, view_score)
