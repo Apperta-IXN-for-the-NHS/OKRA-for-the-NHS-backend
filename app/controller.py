@@ -253,17 +253,23 @@ def add_case() -> (str, int):
         return 'cannot add to db', 400
 
 
-# this is used for testing purpose, to be able to test without trigger the scheduler
-@api.route('/update/trending', methods=['GET'])
-def update_trending_score():
-    d = update_trending()
-    # if not found, return 404
-    return "success", 200 if d else 404
+# @api.route('/update/trending', methods=['GET'])
+# def update_trending_score() -> (str, int):
+#     """this is used for testing purpose, to be able to test without trigger the scheduler"""
+#     d = update_trending()
+#     # if not found, return 404
+#     if d:
+#         return "success", 200
+#     else:
+#         return "fail", 404
 
 
-# this is used for testing purpose, to be able to test without trigger the scheduler
-@api.route('/update/related', methods=['GET'])
-def update_related_score():
-    d = update_related()
-    # if not found, return 404
-    return "success", 200 if d else 404
+# @api.route('/update/related', methods=['GET'])
+# def update_related_score() -> (str, int):
+#     """this is used for testing purpose, to be able to test without trigger the scheduler"""
+#     d = update_related()
+#     # if not found, return 404
+#     if d:
+#         return "success", 200
+#     else:
+#         return "fail", 404
