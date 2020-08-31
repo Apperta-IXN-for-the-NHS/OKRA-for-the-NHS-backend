@@ -70,12 +70,14 @@ POST 162.62.53.126:4123/articles/{article_id}/vote
 
 replace {article_id} with string
 
+previous and current could be -1, 0 and 1
+
 Accept JSON format:
 
 ```json
 {
-    "previous": -1/0/1,
-    "current": -1/0/1
+    "previous": 0,
+    "current": 1
 }
 ```
 
@@ -100,13 +102,15 @@ GET 162.62.53.126:4123/cases/{case_id}
 
 replace {case_id} with string
 
+Priority is between 1 to 4, 1 represents the highest priority.
+
 Returned JSON format:
 ```json
 {
     "id": "string",
     "title": "string",
     "body": "string",
-    "priority": 1 - 4,
+    "priority": 1,
     "date": "string"
 }
 ```
@@ -122,6 +126,8 @@ Optional parameters:
 - start: the start index
 - query: search term
 
+Priority is between 1 to 4, 1 represents the highest priority.
+
 Returned JSON format:
 
 ```json
@@ -130,7 +136,7 @@ Returned JSON format:
         "id": "string",
         "title": "string",
         "body": "string",
-        "priority": 1 - 4,
+        "priority": 1,
         "date": "string"
     }
 ]
@@ -140,12 +146,14 @@ Returned JSON format:
 
 POST 162.62.53.126:4123/cases
 
+Priority is between 1 to 4, 1 represents the highest priority.
+
 Accept JSON format:
 ```json
 {
     "title": "string",
     "body": "string",
-    "priority": 1 - 4
+    "priority": 1
 }
 ```
 
