@@ -75,9 +75,9 @@ def get_articles() -> (str, int):
     #         "id": "string",
     #         "title": "string",
     #         "author": "string",
-    #         "created": "string: 2020-08-01"
+    #         "created": "string: 2020-08-01",
     #         "view_count": 0,
-    #         "net_votes": 0,
+    #         "net_votes": 0
     #     }
     # ]
 
