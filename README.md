@@ -1,6 +1,6 @@
 # Emis Backend
 
-This is the backend of the Emis project.
+This is the backend of OKRA in EMIS project.
 
 ## REST APIs
 
@@ -10,11 +10,11 @@ Port: 4123
 
 ### Get an article by ID
 
-GET 162.62.53.126:4123/articles/{articleId}
+GET 162.62.53.126:4123/articles/{article_id}
 
-**JSON return**
+replace {article_id} with string
 
-An example:
+Returned JSON format:
 
 ```json
 {
@@ -23,13 +23,16 @@ An example:
     "author": "string",
     "created": "string",
     "body": "string",
+    "view_count": 0,
+    "net_votes": 0,
     "related": [
         {
             "id": "string",
             "title": "string",
             "author": "string",
             "created": "string",
-            "view_count": 0
+            "view_count": 0,
+            "net_votes": 0
         }
     ]
 }
@@ -37,29 +40,125 @@ An example:
 
 ### Get articles sorted by trending and similarity
 
-GET 162.62.53.126:4123/articles\[?limit=10\]\[&start=20\]\[&query=keyword]
+GET 162.62.53.126:4123/articles?limit={limit_num}&start={start_index}&query={query_term}
+
+replace {limit_num} and {start_index} with integer, {query_term} with string
 
 Optional parameters:
-
 - limit: the number of shown articles
 - start: the start index
 - query: search term
 
-**JSON return**
-
-An example:
+Returned JSON format:
 
 ```json
 [
-  {
-    "id": "string",
-    "title": "string", 
-    "author": "string",
-    "created": "2020-08-01"
-  }
+    {
+        "id": "string",
+        "title": "string",
+        "author": "string",
+        "created": "string: 2020-08-01",
+        "view_count": 0,
+        "net_votes": 0
+    }
 ]
 ```
+
+### Vote articles
+
+POST 162.62.53.126:4123/articles/{article_id}/vote
+
+replace {article_id} with string
+
+Accept JSON format:
+
+```json
+{
+    "previous": -1/0/1,
+    "current": -1/0/1
+}
+```
+
+### Add an article
+
+POST 162.62.53.126:4123/articles
+
+Accept JSON format:
+```json
+{
+    "short_description": "string",
+    "author": "string",
+    "text": "string"
+}
+```
+There could be other optional keys: number, kb_category, article_type, kb_knowledge_base, published, sys_tags, sys_view_count
+
+
+### Get a case by id
+
+GET 162.62.53.126:4123/cases/{case_id}
+
+replace {case_id} with string
+
+Returned JSON format:
+```json
+{
+    "id": "string",
+    "title": "string",
+    "body": "string",
+    "priority": 1 - 4,
+    "date": "string"
+}
+```
+
+### Get cases sorted by date and priority
+
+GET 162.62.53.126:4123/cases?limit={limit_num}&start={start_index}&query={query_term}
+
+replace {limit_num} and {start_index} with integer, {query_term} with string
+
+Optional parameters:
+- limit: the number of shown cases
+- start: the start index
+- query: search term
+
+Returned JSON format:
+
+```json
+[
+    {
+        "id": "string",
+        "title": "string",
+        "body": "string",
+        "priority": 1 - 4,
+        "date": "string"
+    }
+]
+```
+
+### Add a case
+
+POST 162.62.53.126:4123/cases
+
+Accept JSON format:
+```json
+{
+    "title": "string",
+    "body": "string",
+    "priority": 1 - 4
+}
+```
+
 ## Tests
+
+### Unit Testing
+
+Unit Testing is done by unittest. The test files will be executed automatically in the continuous integration.
+
+```cmd
+python tests/unittest/test_knowledge_endpoint.py
+python tests/unittest/test_case_endpoint.py
+```
 
 ### Performance Testing
 Performance Testing is done by Locust.
@@ -72,15 +171,34 @@ Performance Testing is done by Locust.
 
 2. Run Locust
 
-   ```cmd
-   locust
-   ```
+   - Command Line Interface
+     - -u: number of users
 
-3. visit http://127.0.0.1:8089/
+     - -r: hatch rate, number of users generated per second
+
+     - -t: run time, terminate after specified time
+
+     - --headless: headless mode
+
+       ```cmd
+       locust -u 500 -r 100 -t 5m --headless
+       ```
+
+   - Graphical User Interface
+
+     - command
+
+       ```cmd
+       locust
+       ```
+
+     - visit http://127.0.0.1:8089/ and input parameter values
 
 ## Docker
 
-If you want to use the backend locally, first make sure Docker is installed locally
+**Attention**: On our VPS, the Gunicorn server of the back-end application uses the port 41234, and the Nginx server mapping port 41234 to port 4123. If you visit port 41234, requests will be handled by Gunicorn directly. If you visit port 4123, requests will be handled by Gunicorn + Nginx.
+
+If you want to use the back-end application, first make sure Docker is installed locally
 
 ### Clone & Build
 
@@ -117,4 +235,3 @@ If you want to use the backend locally, first make sure Docker is installed loca
    docker run -d -p 4123:80 wentaoyang/emis-backend:latest
    ```
 
-   
