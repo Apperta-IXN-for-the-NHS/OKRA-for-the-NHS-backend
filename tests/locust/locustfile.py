@@ -1,11 +1,10 @@
-import random
 from locust import TaskSet, task, HttpUser
 
 
 class Tasks(TaskSet):
-    @task(4)
+    @task
     def get_article_by_id(self):
-        article_id = '223131ea1bb1d0106281fcc1cd4bcbc9'
+        article_id = '65bba7181b42901064244375cc4bcb61'
         self.client.get(f'/articles/{article_id}', name='/articles/id')
 
     @task
@@ -13,16 +12,43 @@ class Tasks(TaskSet):
         self.client.get('/articles')
 
     @task
-    def get_articles_with_limit(self):
-        self.client.get(f'/articles?limit={random.randint(0,11)}', name='/articles')
-
-    @task
-    def get_articles_with_start(self):
-        self.client.get(f'/articles?start={random.randint(0,11)}', name='/articles')
-
-    @task
     def get_articles_with_limit_and_start(self):
-        self.client.get(f'/articles?start={random.randint(0,11)}&limit={random.randint(0,11)}', name='/articles')
+        start = 1
+        limit = 1
+        self.client.get(f'/articles?start={start}&limit={limit}', name='/articles')
+
+    @task
+    def get_articles_with_query(self):
+        query_term = "test"
+        start = 1
+        limit = 1
+        self.client.get(f'/articles?query={query_term}&start={start}&limit={limit}', name='/articles?query')
+
+    @task
+    def up_vote(self):
+        article_id = '65bba7181b42901064244375cc4bcb61'
+        data = {"previous": 0, "current": 1}
+        self.client.post(f'/articles/{article_id}/vote', json=data, name='/articles/id/vote')
+
+    @task
+    def down_vote(self):
+        article_id = '65bba7181b42901064244375cc4bcb61'
+        data = {"previous": 0, "current": -1}
+        self.client.post(f'/articles/{article_id}/vote', json=data, name='/articles/id/vote')
+
+    @task
+    def get_cases_with_limit_and_start(self):
+        start = 1
+        limit = 1
+        self.client.get(f'/cases?start={start}&limit={limit}', name='/cases')
+
+    @task
+    def get_cases_with_query(self):
+        query_term = "case"
+        start = 1
+        limit = 1
+        self.client.get(f'/cases?query={query_term}&start={start}&limit={limit}', name='/cases?query')
+
 
 class User(HttpUser):
     host = 'http://162.62.53.126:4123'

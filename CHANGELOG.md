@@ -4,6 +4,28 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2020-08-30
+
+### Added
+
+- API for adding articles
+- Documentation
+- Case support
+- View count and vote in responses
+
+## [0.4.1] - 2020-08-21
+
+### Changed
+
+- related articles sorted by trending and similarity scores
+
+## [0.4.0] - 2020-08-21
+
+### Added
+
+- vote feature
+- return articles sorted by trending score
+
 ## [0.3.0] - 2020-08-18
 
 ### Added

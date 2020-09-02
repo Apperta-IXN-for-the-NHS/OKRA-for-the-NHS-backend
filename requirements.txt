@@ -7,3 +7,6 @@ psycopg2-binary
 gensim
 nltk
 apscheduler
+sqlalchemy
+numpy
+scipy

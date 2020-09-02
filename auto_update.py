@@ -1,6 +1,5 @@
-import requests
 from apscheduler.schedulers.blocking import BlockingScheduler
-from app.trending_service import update_trending, update_related
+from app.service.trending_service import update_trending, update_related
 # this class is used to automatically make a request to the VPS web service to update trending and similarity score
 
 
@@ -21,5 +20,3 @@ def start_scheduler():
     scheduler.add_job(update_trending, 'interval', hours=24)
     scheduler.add_job(update_related_scheduler, 'interval', hours=168)
     scheduler.start()
-
-
