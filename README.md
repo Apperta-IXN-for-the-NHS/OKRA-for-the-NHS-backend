@@ -159,6 +159,10 @@ Accept JSON format:
 }
 ```
 
+## Database Schema
+
+![image](images/emis_ml_db.png)
+
 ## Tests
 
 ### Unit Testing
