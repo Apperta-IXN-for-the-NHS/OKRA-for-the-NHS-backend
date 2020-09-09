@@ -8,7 +8,9 @@ from sqlalchemy.ext.automap import automap_base
 
 app = Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:%40EMIS123@162.62.53.126:5432/emis_ml_db"
+# need to be changed
+app.config['SQLALCHEMY_DATABASE_URI'] = "DB_CONNECTION_URL"
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 db.Model.metadata.reflect(db.engine)

@@ -1,16 +1,12 @@
-# Emis Backend
+# OKRA Backend
 
-This is the backend of OKRA in EMIS project.
+This is the backend of Open Knowledge Rank (OKRA).
 
 ## REST APIs
 
-VPS IP Address: 162.62.53.126
-
-Port: 4123
-
 ### Get an article by ID
 
-GET 162.62.53.126:4123/articles/{article_id}
+GET /articles/{article_id}
 
 replace {article_id} with string
 
@@ -40,11 +36,12 @@ Returned JSON format:
 
 ### Get articles sorted by trending and similarity
 
-GET 162.62.53.126:4123/articles?limit={limit_num}&start={start_index}&query={query_term}
+GET /articles?limit={limit_num}&start={start_index}&query={query_term}
 
 replace {limit_num} and {start_index} with integer, {query_term} with string
 
 Optional parameters:
+
 - limit: the number of shown articles
 - start: the start index
 - query: search term
@@ -66,7 +63,7 @@ Returned JSON format:
 
 ### Vote articles
 
-POST 162.62.53.126:4123/articles/{article_id}/vote
+POST /articles/{article_id}/vote
 
 replace {article_id} with string
 
@@ -83,9 +80,10 @@ Accept JSON format:
 
 ### Add an article
 
-POST 162.62.53.126:4123/articles
+POST /articles
 
 Accept JSON format:
+
 ```json
 {
     "short_description": "string",
@@ -93,18 +91,20 @@ Accept JSON format:
     "text": "string"
 }
 ```
+
 There could be other optional keys: number, kb_category, article_type, kb_knowledge_base, published, sys_tags, sys_view_count
 
 
 ### Get a case by id
 
-GET 162.62.53.126:4123/cases/{case_id}
+GET /cases/{case_id}
 
 replace {case_id} with string
 
 Priority is between 1 to 4, 1 represents the highest priority.
 
 Returned JSON format:
+
 ```json
 {
     "id": "string",
@@ -117,11 +117,12 @@ Returned JSON format:
 
 ### Get cases sorted by date and priority
 
-GET 162.62.53.126:4123/cases?limit={limit_num}&start={start_index}&query={query_term}
+GET /cases?limit={limit_num}&start={start_index}&query={query_term}
 
 replace {limit_num} and {start_index} with integer, {query_term} with string
 
 Optional parameters:
+
 - limit: the number of shown cases
 - start: the start index
 - query: search term
@@ -144,11 +145,12 @@ Returned JSON format:
 
 ### Add a case
 
-POST 162.62.53.126:4123/cases
+POST /cases
 
 Priority is between 1 to 4, 1 represents the highest priority.
 
 Accept JSON format:
+
 ```json
 {
     "title": "string",
@@ -169,6 +171,7 @@ python tests/unittest/test_case_endpoint.py
 ```
 
 ### Performance Testing
+
 Performance Testing is done by Locust.
 
 1. Go to tests/locust dir
@@ -180,6 +183,7 @@ Performance Testing is done by Locust.
 2. Run Locust
 
    - Command Line Interface
+
      - -u: number of users
 
      - -r: hatch rate, number of users generated per second
@@ -202,44 +206,42 @@ Performance Testing is done by Locust.
 
      - visit http://127.0.0.1:8089/ and input parameter values
 
-## Docker
+## Reuse
 
-**Attention**: On our VPS, the Gunicorn server of the back-end application uses the port 41234, and the Nginx server mapping port 41234 to port 4123. If you visit port 41234, requests will be handled by Gunicorn directly. If you visit port 4123, requests will be handled by Gunicorn + Nginx.
+If you want to reuse the backend application, please follow the instruction below.
 
-If you want to use the back-end application, first make sure Docker is installed locally
+1. make sure Docker is installed locally and opened
 
-### Clone & Build
+2. clone the repo to local
 
-1. clone the repo to local
+    ```cmd
+    git clone https://github.com/Apperta-IXN-for-the-NHS/OKRA-for-the-NHS-backend.git
+    ```
 
-   ```cmd
-   git clone https://github.com/Went-Yang/emis-backend.git
-   ```
+3. go to `app/__init__.py` and find the following statement, change to your database connection url
 
-2. build docker file
+    ```python
+   app.config['SQLALCHEMY_DATABASE_URI'] = "DB_CONNECTION_URL"
+    ```
 
-   ```cmd
-   docker build -t 'emis-backend' .
-   ```
+4. build Docker file
 
-3. run docker
+    ```cmd
+    docker build -t 'okra-backend' .
+    ```
 
-   ```cmd
-   docker run -d -p 4123:80 emis-backend
-   ```
+5. run Docker (specify the port you want to use, e.g. 4123)
 
+    ```cmd
+    docker run -d -p 4123:80 okra-backend
+    ```
 
-### Pull from Docker Hub
+### Testing
 
-1. pull the docker files
+1. go to `tests/locust/locustfile.py` and find the following statement, change to your website url 
 
-   ```cmd
-   docker pull wentaoyang/emis-backend:latest
-   ```
+    ```python
+   host = 'WEBSITE_URL'
+    ```
 
-2. run docker
-
-   ```cmd
-   docker run -d -p 4123:80 wentaoyang/emis-backend:latest
-   ```
-
+2. To enable unit testing and performance testing, test cases in `tests/locust/locustfile.py`, `tests/unittest/test_case_endpoint.py` and `tests/unittest/test_knowledge_endpoint.py` need to be changed according to the valid data in your database.
