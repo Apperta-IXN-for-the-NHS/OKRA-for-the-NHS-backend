@@ -51,7 +51,9 @@ class Tasks(TaskSet):
 
 
 class User(HttpUser):
-    host = 'http://162.62.53.126:4123'
+    # need to be changed
+    host = 'WEBSITE_URL'
+
     tasks = [Tasks]
     min_wait = 1000
     max_wait = 5000

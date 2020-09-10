@@ -8,21 +8,9 @@ class RestAPITests(unittest.TestCase):
         self.tester = app.test_client(self)
 
     def test_get_article_by_id(self):
-        response = json.loads(
-            self.tester.get('/articles/223131ea1bb1d0106281fcc1cd4bcbc9', content_type='html/text').data)
-        self.assertEqual(response['id'], '223131ea1bb1d0106281fcc1cd4bcbc9')
-        self.assertEqual(response['author'], 'Michael Sheary')
-        self.assertEqual(response['created'], "2020-07-07")
-        self.assertEqual(response['title'], 'EMIS Web third party network access advisory')
-        self.assertIsNotNone(response['body'])
-        self.assertTrue(len(response['related']) >= 0)
-
-        for article in response['related']:
-            self.assertIsNotNone(article['id'])
-            self.assertIsNotNone(article['created'])
-            self.assertIsNotNone(article['author'])
-            self.assertIsNotNone(article['title'])
-            self.assertIsNotNone(article['view_count'])
+        response = self.tester.get('/articles/a746226a1bb954106281fcc1cd4bcb7a', content_type='html/text')
+        self.assertTrue('200' in response.status)
+        self.assertTrue(len(json.loads(response.data)) > 0)
 
     def test_get_not_existing_articles(self):
         response = json.loads(self.tester.get('/articles/1', content_type='html/text').data)
