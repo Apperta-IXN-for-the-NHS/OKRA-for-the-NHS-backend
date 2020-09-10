@@ -6,3 +6,5 @@ threads = 2
 worker_class = "gevent"
 # port
 bind = "0.0.0.0:80"
+# timeout
+timeout = 120
